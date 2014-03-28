@@ -1,0 +1,37 @@
+{
+  "name": "ownloud-issues",
+  "description": "ownCloud Github Issues",
+  "version": "0.0.1",
+  "author": {
+    "name": "Thomas Tanghus",
+    "email": "thomas@tanghus.net"
+  },
+  "private": true,
+  "homepage": "https://github.com/tanghus/issues",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:tanghus/issues.git"
+  },
+  "bugs": "https://github.com/tanghus/issues/issues",
+  "license": "AGPL",
+  "contributors": [],
+  "dependencies": {
+    "marked": "~0.3"
+  },
+  "devDependencies": {
+    "bower": "*",
+    "grunt": "*",
+    "grunt-cli": "*",
+    "grunt-contrib-concat": "*",
+    "grunt-contrib-watch": "*",
+    "grunt-karma": "*",
+    "grunt-wrap": "*",
+    "grunt-phpunit": "*",
+    "karma-jasmine": "^0.2.2",
+    "karma-phantomjs-launcher": "*",
+    "jquery": "^1.11.1-beta1",
+    "jquery-ui": "*",
+    "marked": "~0.3"
+  },
+  "engine": "node >= 0.8"
+}

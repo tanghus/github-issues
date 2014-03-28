@@ -1,0 +1,11 @@
+{
+  "name": "ownCloud Github Issues",
+  "version": "0.0.1",
+  "dependencies": {
+    "angular": "~1.2.15",
+    "angular-ui": "",
+    "angular-mocks": "",
+    "angular-route": "",
+    "angular-resource": ""
+  }
+}

@@ -1,0 +1,9 @@
+{
+    "require": {
+        "php": ">=5.3.4",
+        "knplabs/github-api": "*",
+        "erusev/parsedown": "*"
+    },
+    "minimum-stability": "dev"
+}
+
