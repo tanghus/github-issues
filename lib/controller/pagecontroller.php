@@ -34,6 +34,7 @@ class PageController extends Controller {
 			\OCP\Util::addScript('issues', 'bower_components/angular-resource/angular-resource.min');
 		}
 		\OCP\Util::addScript('issues', 'app');
+		\OCP\Util::addScript('issues', 'controllers/intro');
 		\OCP\Util::addScript('issues', 'controllers/repos');
 		\OCP\Util::addScript('issues', 'controllers/issues');
 		\OCP\Util::addScript('issues', 'controllers/issue');

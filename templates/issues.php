@@ -1,7 +1,8 @@
-<table id="issues">
+<table id="issues" ng-class="{'loading': !initialized}">
 	<thead>
-		<tr id="issuesHeader">
+		<tr id="issuesHeader" ng-class="{'hidden': !initialized}">
 			<td class="name" colspan="2">
+				<h1><a class="back-arrow navigation" title="Back" href="#/">&lt;&nbsp;</a>{{org}}&nbsp;/&nbsp;{{repo}}<h1>
 			</td>
 		</tr>
 	</thead>
@@ -19,9 +20,10 @@
 		</tr>
 	</tbody>
 	<tfoot>
-		<tr id="issuesFooter">
+		<tr id="issuesFooter" ng-class="{'hidden': !initialized}">
 			<td colspan="2">
-				<button>&lt; Previous</button><button>Next &gt;</button>
+				<button ng-click="prevPage()" ng-class="{'hidden': page == 1}">&lt; Previous</button>
+				<button ng-click="nextPage()">Next &gt;</button>
 			</td>
 		</tr>
 	</tfoot>

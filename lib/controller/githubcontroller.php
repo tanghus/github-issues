@@ -121,11 +121,11 @@ class GithubController extends Controller {
 		$headers = $this->github->getHttpClient()->getLastResponse()->getHeaders();
 
 		foreach ($headers as $name => $value) {
-			\OCP\Util::writeLog('issues', __METHOD__.' header: ' . $name . ': ' . print_r($value, true), \OCP\Util::DEBUG);
+			//\OCP\Util::writeLog('issues', __METHOD__.' header: ' . $name . ': ' . print_r($value, true), \OCP\Util::DEBUG);
 		}
 
-		\OCP\Util::writeLog('issues', __METHOD__.' RateLimit: ' . $this->github->getHttpClient()->getLastResponse()->getHeader('X-RateLimit-Limit'), \OCP\Util::DEBUG);
-		\OCP\Util::writeLog('issues', __METHOD__.' Remaining: ' . $this->github->getHttpClient()->getLastResponse()->getHeader('X-RateLimit-Remaining'), \OCP\Util::DEBUG);
+		//\OCP\Util::writeLog('issues', __METHOD__.' RateLimit: ' . $this->github->getHttpClient()->getLastResponse()->getHeader('X-RateLimit-Limit'), \OCP\Util::DEBUG);
+		//\OCP\Util::writeLog('issues', __METHOD__.' Remaining: ' . $this->github->getHttpClient()->getLastResponse()->getHeader('X-RateLimit-Remaining'), \OCP\Util::DEBUG);
 		//\OCP\Util::writeLog('issues', __METHOD__.' Link: ' . print_r($this->github->getHttpClient()->getLastResponse()->getHeader('link')->getLink('next'), true), \OCP\Util::DEBUG);
 
 		foreach ($tmpRepos as $repo) {
@@ -151,13 +151,18 @@ class GithubController extends Controller {
 
 		$org = $params['org'];
 		$repo = $params['repo'];
+		$page = isset($this->request['page'])
+			? $this->request['page']
+			: '1';
 		$issues = array();
+
+		\OCP\Util::writeLog('issues', __METHOD__.' page: ' . $page, \OCP\Util::DEBUG);
 
 		try {
 			$tmpIssues = $this->github->api('issues')->all(
 				$org,
 				$repo,
-				array('sort' => 'created', 'state' => 'all')
+				array('sort' => 'created', 'state' => 'all', 'page' => $page)
 			);
 
 			foreach ($tmpIssues as $issue) {
@@ -173,6 +178,13 @@ class GithubController extends Controller {
 			foreach ($headers as $name => $value) {
 				\OCP\Util::writeLog('issues', __METHOD__.' header: ' . $name . ': ' . print_r($value, true), \OCP\Util::DEBUG);
 			}*/
+			$links = $this->github->getHttpClient()->getLastResponse()->getHeader('link');
+			if ($links) {
+				\OCP\Util::writeLog('issues', __METHOD__.' prev: ' . print_r($links->getLink('prev'), true), \OCP\Util::DEBUG);
+				\OCP\Util::writeLog('issues', __METHOD__.' next: ' . print_r($links->getLink('next'), true), \OCP\Util::DEBUG);
+				\OCP\Util::writeLog('issues', __METHOD__.' first: ' . print_r($links->getLink('first'), true), \OCP\Util::DEBUG);
+				\OCP\Util::writeLog('issues', __METHOD__.' last: ' . print_r($links->getLink('last'), true), \OCP\Util::DEBUG);
+			}
 			$response->setData($issues);
 
 			return $response;

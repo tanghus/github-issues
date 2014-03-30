@@ -9,10 +9,17 @@
 /* Issue List Controller */
 var issuesCtrl = angular.module('IssuesCtrl', []);
 
-issuesCtrl.controller('IssuesCtrl', ['$scope', '$routeParams', 'OC', 'Request', function($scope, $routeParams, OC, Request) {
+issuesCtrl.controller(
+	'IssuesCtrl', ['$scope', '$location', '$routeParams', 'OC', 'Request',
+	function($scope, $location, $routeParams, OC, Request
+) {
 
 	console.log('routeParams', $routeParams);
-	Request.getIssues($routeParams.org, $routeParams.repo)
+	console.log('page', $routeParams.page || 1);
+	$scope.initialized = false;
+	$scope.page = $routeParams.page || 1;
+	var params = {page: $scope.page};
+	Request.getIssues($routeParams.org, $routeParams.repo, params)
 	.then(function(response) {
 		// call was successful
 		$scope.org = $routeParams.org;
@@ -26,9 +33,21 @@ issuesCtrl.controller('IssuesCtrl', ['$scope', '$routeParams', 'OC', 'Request', 
 			issues.push(issue);
 		});
 		$scope.issues = issues;
+		$scope.initialized = true;
 	}, function(response) {
 		// TODO: call returned an error
 		$scope.issues = response;
 	});
 
+	$scope.nextPage = function() {
+		$scope.page = parseInt($scope.page) + 1;
+		console.log('gotoPage', $scope.page);
+		$location.search({page: $scope.page});
+	}
+
+	$scope.prevPage = function() {
+		$scope.page = parseInt($scope.page) - 1;
+		console.log('gotoPage', $scope.page);
+		$location.search({page: $scope.page});
+	}
 }]);

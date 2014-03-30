@@ -4,6 +4,7 @@
 
 var issues = angular.module('Issues', [
 	'ngRoute',
+	'IntroCtrl',
 	'ReposCtrl',
 	'IssuesCtrl',
 	'issueDetailCtrl'
@@ -22,8 +23,14 @@ issues.config(['$routeProvider',
 			templateUrl: 'templates/issue.php',
 			controller: 'issueDetailCtrl'
 		}).
+		when('/:org/:repo/new', {
+			templateUrl: 'templates/newissues.php',
+			controller: 'NewIssueCtrl'
+		}).
 		otherwise({
-			redirectTo: OC.generateUrl('apps/issues')
+			templateUrl: 'templates/intro.php',
+			controller: 'IntroCtrl'
+			//redirectTo: '/'
 		});
 	}
 ]);

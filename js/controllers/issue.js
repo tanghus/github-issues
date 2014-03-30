@@ -16,6 +16,7 @@ issueCtrl.controller(
 ) {
 
 	console.log('routeParams', $routeParams);
+	$scope.initialized = false;
 	Request.getIssue($routeParams.org, $routeParams.repo, $routeParams.issue)
 	.then(function(issue) {
 		// call was successful
@@ -38,6 +39,7 @@ issueCtrl.controller(
 		$scope.org = $routeParams.org;
 		$scope.repo = $routeParams.repo;
 		$scope.issue = issue;
+		$scope.initialized = true;
 	}, function(issue) {
 		// TODO: call returned an error
 		$scope.issue = issue;
