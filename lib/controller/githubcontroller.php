@@ -142,6 +142,46 @@ class GithubController extends Controller {
 	}
 
 	/**
+	* Extract the page numbers from the Link header
+	*
+	* Returns an assosiative array with the keys:
+	* prev, next, first and last containing either an
+	* integer or null.
+	*
+	* @param \Guzzle\Http\Message\Header\Link $links
+	* @return array
+	*/
+	protected function extractPages($links) {
+
+		$pages = array(
+			'prev' => null,
+			'next' => null,
+			'first' => null,
+			'last' => null
+		);
+
+		if (!$links) {
+			return $pages;
+		}
+
+		foreach (array_keys($pages) as $rel) {
+			$link = $links->getLink($rel);
+
+			/*if (!is_array($link)) {
+				continue;
+			}*/
+
+			$url = $link['url'];
+			$query = parse_url($url, PHP_URL_QUERY );
+			$vars = array();
+			parse_str($query, $vars);
+			$pages[$rel] = $vars['page'];
+		}
+
+		return $pages;
+	}
+
+	/**
 	 * @NoAdminRequired
 	 */
 	public function getIssues() {
@@ -179,13 +219,9 @@ class GithubController extends Controller {
 				\OCP\Util::writeLog('issues', __METHOD__.' header: ' . $name . ': ' . print_r($value, true), \OCP\Util::DEBUG);
 			}*/
 			$links = $this->github->getHttpClient()->getLastResponse()->getHeader('link');
-			if ($links) {
-				\OCP\Util::writeLog('issues', __METHOD__.' prev: ' . print_r($links->getLink('prev'), true), \OCP\Util::DEBUG);
-				\OCP\Util::writeLog('issues', __METHOD__.' next: ' . print_r($links->getLink('next'), true), \OCP\Util::DEBUG);
-				\OCP\Util::writeLog('issues', __METHOD__.' first: ' . print_r($links->getLink('first'), true), \OCP\Util::DEBUG);
-				\OCP\Util::writeLog('issues', __METHOD__.' last: ' . print_r($links->getLink('last'), true), \OCP\Util::DEBUG);
-			}
-			$response->setData($issues);
+			$pages = $this->extractPages($links);
+			$navigation = array_merge($this->request->get, $pages);
+			$response->setData(array('issues' => $issues, 'navigation' => $navigation));
 
 			return $response;
 		} catch (\Github\Exception\RuntimeException $e) {

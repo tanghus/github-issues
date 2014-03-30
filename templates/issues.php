@@ -22,8 +22,20 @@
 	<tfoot>
 		<tr id="issuesFooter" ng-class="{'hidden': !initialized}">
 			<td colspan="2">
-				<button ng-click="prevPage()" ng-class="{'hidden': page == 1}">&lt; Previous</button>
-				<button ng-click="nextPage()">Next &gt;</button>
+				<a href="#/{{org}}/{{repo}}/?page={{navigation.first}}" class="button" ng-class="{'hidden': navigation.page == 1}">
+					&lt;&lt; First
+				</a>
+				<a href="#/{{org}}/{{repo}}/?page={{navigation.prev}}" class="button" ng-class="{'hidden': navigation.page == 1}">
+					&lt; Previous
+				</a>
+				<a href="#/{{org}}/{{repo}}/?page={{navigation.next}}" class="button" ng-class="{'hidden': navigation.page == navigation.last}">
+					Next &gt;
+				</a>
+				<a href="#/{{org}}/{{repo}}/?page={{navigation.last}}" class="button" ng-class="{'hidden': !navigation.last || navigation.page == navigation.last}">
+					Last &gt;&gt;
+				</a>
+				<!-- button ng-click="prevPage()" ng-class="{'hidden': page == 1}">&lt; Previous</button>
+				<button ng-click="nextPage()">Next &gt;</button -->
 			</td>
 		</tr>
 	</tfoot>

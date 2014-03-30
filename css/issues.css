@@ -121,6 +121,10 @@ pre.body {
 	list-style-type: decimal;
 }
 
+/* Hide Huboard comments */
+#issue .body [href*="!---"] {
+	display: none;
+}
 
 #issue a:not(.navigation) {
     color: #4183C4;
@@ -133,3 +137,4 @@ pre.body {
 
 a.back-arrow {
 }
+
