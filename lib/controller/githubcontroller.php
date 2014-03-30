@@ -64,7 +64,7 @@ class GithubController extends Controller {
 		$this->ghClientConfig = $this->readClientConfig();
 		if($this->ghClientConfig !== false) {
 		} else {
-			$this->github->authenticate('tanghus', 'hjkiu45d', Client::AUTH_HTTP_PASSWORD);
+			$this->github->authenticate('xxx', 'xxx', Client::AUTH_HTTP_PASSWORD);
 		}
 		$this->github->getHttpClient()->setOption('user_agent', 'ownCloud Issues');
 
