@@ -53,12 +53,13 @@ angular.module('Issues').factory('Request', ['$http', '$q', 'OC', function($http
 			var config = {
 				method: method,
 				url: OC.generateUrl('apps/issues/' + route, routeParams),
-				data: params,
+				params: params,
 				headers: headers
 			};
 
 			var deferred = $q.defer();
 
+			console.log('params', params);
 			$http(config)
 			.success(function(response, status, headers, config) {
 				console.log('status, headers, config', status, headers(), config);

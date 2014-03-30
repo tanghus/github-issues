@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <info>
 	<id>issues</id>
-	<name>ownCloud Issues</name>
-	<description>Issue search and report.
+	<name>Issues Tracker</name>
+	<description>Search and report issues on github.
 	</description>
 	<version>0.1</version>
 	<licence>AGPL</licence>

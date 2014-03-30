@@ -12,10 +12,12 @@ var reposCtrl = angular.module('ReposCtrl', []);
 reposCtrl.controller('ReposCtrl', ['$scope', 'OC', 'Request', function($scope, OC, Request) {
 
 	$scope.org = 'owncloud';
+	$scope.initialized = false;
 	Request.getRepos('owncloud')
 	.then(function(response) {
 		// call was successful
 		$scope.repos = response;
+		$scope.initialized = true;
 	}, function(response) {
 		// TODO: call returned an error
 		$scope.repos = response;

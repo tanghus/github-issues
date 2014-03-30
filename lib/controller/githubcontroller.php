@@ -121,11 +121,11 @@ class GithubController extends Controller {
 		$headers = $this->github->getHttpClient()->getLastResponse()->getHeaders();
 
 		foreach ($headers as $name => $value) {
-			\OCP\Util::writeLog('issues', __METHOD__.' header: ' . $name . ': ' . print_r($value, true), \OCP\Util::DEBUG);
+			//\OCP\Util::writeLog('issues', __METHOD__.' header: ' . $name . ': ' . print_r($value, true), \OCP\Util::DEBUG);
 		}
 
-		\OCP\Util::writeLog('issues', __METHOD__.' RateLimit: ' . $this->github->getHttpClient()->getLastResponse()->getHeader('X-RateLimit-Limit'), \OCP\Util::DEBUG);
-		\OCP\Util::writeLog('issues', __METHOD__.' Remaining: ' . $this->github->getHttpClient()->getLastResponse()->getHeader('X-RateLimit-Remaining'), \OCP\Util::DEBUG);
+		//\OCP\Util::writeLog('issues', __METHOD__.' RateLimit: ' . $this->github->getHttpClient()->getLastResponse()->getHeader('X-RateLimit-Limit'), \OCP\Util::DEBUG);
+		//\OCP\Util::writeLog('issues', __METHOD__.' Remaining: ' . $this->github->getHttpClient()->getLastResponse()->getHeader('X-RateLimit-Remaining'), \OCP\Util::DEBUG);
 		//\OCP\Util::writeLog('issues', __METHOD__.' Link: ' . print_r($this->github->getHttpClient()->getLastResponse()->getHeader('link')->getLink('next'), true), \OCP\Util::DEBUG);
 
 		foreach ($tmpRepos as $repo) {
@@ -142,6 +142,46 @@ class GithubController extends Controller {
 	}
 
 	/**
+	* Extract the page numbers from the Link header
+	*
+	* Returns an assosiative array with the keys:
+	* prev, next, first and last containing either an
+	* integer or null.
+	*
+	* @param \Guzzle\Http\Message\Header\Link $links
+	* @return array
+	*/
+	protected function extractPages($links) {
+
+		$pages = array(
+			'prev' => null,
+			'next' => null,
+			'first' => null,
+			'last' => null
+		);
+
+		if (!$links) {
+			return $pages;
+		}
+
+		foreach (array_keys($pages) as $rel) {
+			$link = $links->getLink($rel);
+
+			/*if (!is_array($link)) {
+				continue;
+			}*/
+
+			$url = $link['url'];
+			$query = parse_url($url, PHP_URL_QUERY );
+			$vars = array();
+			parse_str($query, $vars);
+			$pages[$rel] = $vars['page'];
+		}
+
+		return $pages;
+	}
+
+	/**
 	 * @NoAdminRequired
 	 */
 	public function getIssues() {
@@ -151,13 +191,18 @@ class GithubController extends Controller {
 
 		$org = $params['org'];
 		$repo = $params['repo'];
+		$page = isset($this->request['page'])
+			? $this->request['page']
+			: '1';
 		$issues = array();
+
+		\OCP\Util::writeLog('issues', __METHOD__.' page: ' . $page, \OCP\Util::DEBUG);
 
 		try {
 			$tmpIssues = $this->github->api('issues')->all(
 				$org,
 				$repo,
-				array('sort' => 'created', 'state' => 'all')
+				array('sort' => 'created', 'state' => 'all', 'page' => $page)
 			);
 
 			foreach ($tmpIssues as $issue) {
@@ -173,7 +218,10 @@ class GithubController extends Controller {
 			foreach ($headers as $name => $value) {
 				\OCP\Util::writeLog('issues', __METHOD__.' header: ' . $name . ': ' . print_r($value, true), \OCP\Util::DEBUG);
 			}*/
-			$response->setData($issues);
+			$links = $this->github->getHttpClient()->getLastResponse()->getHeader('link');
+			$pages = $this->extractPages($links);
+			$navigation = array_merge($this->request->get, $pages);
+			$response->setData(array('issues' => $issues, 'navigation' => $navigation));
 
 			return $response;
 		} catch (\Github\Exception\RuntimeException $e) {
