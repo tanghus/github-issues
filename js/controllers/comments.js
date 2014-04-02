@@ -29,7 +29,13 @@
 					comment.reldate = relative_modified_date(date/1000);
 					comment.isodate = date.toISOString();
 					comment.date = date.toLocaleDateString();
-					comment.body = $sce.trustAsHtml(comment.body_html);
+					// We have comments and events in the same stream
+					if (comment.actor) {
+						comment.user = comment.actor;
+					}
+					if (comment.body_html) {
+						comment.body = $sce.trustAsHtml(comment.body_html);
+					}
 					comments.push(comment);
 				});
 				$scope.comments = comments;

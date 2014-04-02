@@ -320,13 +320,13 @@ class GithubController extends Controller {
 		$org = $params['org'];
 		$repo = $params['repo'];
 		$number = $params['number'];
-		$page = 1;
 		$mdRenderer = $this->github->api('markdown');
 		$comments = array();
 
 		$patterns = array('https://github.com/' . $org . '/' . $repo . '/issues/');
 		$replacements = array($this->appPath . '#/'. $org . '/' . $repo . '/');
 
+		$page = 1;
 		while ($tmpComments = $this->github->api('issues')->comments()->all($org, $repo, $number, $page)) {
 			foreach ($tmpComments as &$comment) {
 				if (count($tmpComments) === 0) {
@@ -335,6 +335,23 @@ class GithubController extends Controller {
 				$comment['body_html'] = $mdRenderer->render($comment['body'], 'gfm', $org . '/' . $repo);
 				$comment['body_html'] = str_replace($patterns, $replacements, $comment['body_html']);
 				$comments[] = $comment;
+				$page++;
+			}
+		}
+
+		$relevantEvents = array('closed', 'reopened');
+		$page = 1;
+		while ($events = $this->github->api('issues')->events()->all($org, $repo, $number, $page)) {
+			foreach ($events as &$event) {
+				if (count($events) === 0) {
+					break;
+				}
+				if ($event['event'] === 'closed' && isset($event['commit_id'])) {
+					$event['commit_url'] = 'https://github.com/' . $org . '/' . $repo . '/commit/' . $event['commit_id'];
+				}
+				if (in_array($event['event'], $relevantEvents)) {
+					$comments[] = $event;
+				}
 				$page++;
 			}
 		}

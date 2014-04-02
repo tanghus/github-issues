@@ -18,9 +18,15 @@
 			<li class="comment" ng-repeat="comment in comments| orderBy: 'created_at'">
 				<img width="30" height="30" src="{{comment.user.avatar_url}}size=30" />
 				<a href="{{comment.user.html_url}}" target="_blank" rel="author">{{comment.user.login}}</a>
-				commented
+				<span ng-show="!comment.event">commented</span>
+				<span ng-show="comment.event">
+					{{comment.event}}
+					<span ng-show="comment.event === 'closed' && comment.commit_id">
+						with <a href="{{comment.commit_url}}" target="_blank">{{comment.commit_id}}</a>
+						</span>
+				</span>
 				<time pubdate datetime="{{comment.isodate}}" title="{{comment.date}}">{{comment.reldate}}</time>
-				<div class="body" ng-bind-html="comment.body"></div>
+				<div ng-show="comment.body" class="body" ng-bind-html="comment.body"></div>
 				</a>
 			</li>
 		</ul>

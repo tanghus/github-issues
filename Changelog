@@ -1,0 +1,12 @@
+Changelog
+
+* Load all repos.
+* Filer repos on name.
+* Load issues per repo.
+* Load comments per issue.
+* Sort repos by name.
+* Filter repos input field.
+* Load comments.
+* Show issue events in comment list.
+* Add link to commit when comment is closed.
+* Update title on load and navigation.
