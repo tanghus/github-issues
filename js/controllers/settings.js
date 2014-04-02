@@ -6,16 +6,13 @@
  */
 'use strict';
 
-/* Repository Controller */
+/* Settings Controller */
 (function() {
-	angular.module('ReposCtrl', [])
-	.controller('ReposCtrl', ['$scope', 'OC', 'Request', function($scope, OC, Request) {
+	angular.module('SettingsCtrl', [])
+	.controller('SettingsCtrl', ['$scope', 'OC', 'Request', function($scope, OC, Request) {
 
-		console.log('ReposCtrl');
-		$scope.repos = [];
-		$scope.org = 'owncloud';
 		$scope.initialized = false;
-		Request.getRepos('owncloud')
+		/*Request.getRepos('owncloud')
 		.then(function(response) {
 			// call was successful
 			$scope.repos = response;
@@ -23,7 +20,7 @@
 		}, function(response) {
 			// TODO: call returned an error
 			$scope.repos = response;
-		});
+		});*/
 
 	}]);
 }).call(this);

@@ -7,9 +7,10 @@
 'use strict';
 
 /* Intro Controller */
-var introCtrl = angular.module('IntroCtrl', []);
+(function() {
+	angular.module('IntroCtrl', [])
+	.controller('IntroCtrl', ['$scope', 'OC', 'Request', function($scope, OC, Request) {
+		// Nothing going on here, move on
 
-introCtrl.controller('IntroCtrl', ['$scope', 'OC', 'Request', function($scope, OC, Request) {
-
-
-}]);
+	}]);
+}).call(this);

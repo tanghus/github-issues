@@ -1,8 +1,8 @@
 <table id="issues" ng-class="{'loading': !initialized}">
 	<thead>
-		<tr id="issuesHeader" ng-class="{'hidden': !initialized}">
+		<tr id="issuesHeader" ng-show="initialized">
 			<td class="name" colspan="2">
-				<h1><a class="back-arrow navigation" title="Back" href="#/">&lt;&nbsp;</a>{{org}}&nbsp;/&nbsp;{{repo}}<h1>
+				<h1><a class="back-arrow navigation" title="Back" href="#/">&lang;&nbsp;{{org}}</a>&nbsp;/&nbsp;{{repo}}<h1>
 			</td>
 		</tr>
 	</thead>
@@ -19,23 +19,21 @@
 			<td class="number"><a href="{{issue.html_url}}" target="_blank" title="View on Github">#{{issue.number}}</a></td>
 		</tr>
 	</tbody>
-	<tfoot>
-		<tr id="issuesFooter" ng-class="{'hidden': !initialized}">
+	<tfoot ng-show="issues.length > 0">
+		<tr id="issuesFooter" ng-show="initialized">
 			<td colspan="2">
-				<a href="#/{{org}}/{{repo}}/?page={{navigation.first}}" class="button" ng-class="{'hidden': navigation.page == 1}">
-					&lt;&lt; First
+				<a href="#/{{org}}/{{repo}}/?page={{navigation.first}}" class="button" ng-hide="navigation.page == 1">
+					&Lang; First
 				</a>
-				<a href="#/{{org}}/{{repo}}/?page={{navigation.prev}}" class="button" ng-class="{'hidden': navigation.page == 1}">
-					&lt; Previous
+				<a href="#/{{org}}/{{repo}}/?page={{navigation.prev}}" class="button" ng-hide="navigation.page == 1">
+					&lang; Previous
 				</a>
-				<a href="#/{{org}}/{{repo}}/?page={{navigation.next}}" class="button" ng-class="{'hidden': navigation.page == navigation.last}">
-					Next &gt;
+				<a href="#/{{org}}/{{repo}}/?page={{navigation.next}}" class="button" ng-hide="navigation.page == navigation.last">
+					Next &rang;
 				</a>
-				<a href="#/{{org}}/{{repo}}/?page={{navigation.last}}" class="button" ng-class="{'hidden': !navigation.last || navigation.page == navigation.last}">
-					Last &gt;&gt;
+				<a href="#/{{org}}/{{repo}}/?page={{navigation.last}}" class="button" ng-hide="!navigation.last || navigation.page == navigation.last">
+					Last &Rang;
 				</a>
-				<!-- button ng-click="prevPage()" ng-class="{'hidden': page == 1}">&lt; Previous</button>
-				<button ng-click="nextPage()">Next &gt;</button -->
 			</td>
 		</tr>
 	</tfoot>

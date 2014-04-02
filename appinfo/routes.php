@@ -54,6 +54,17 @@ $this->create('issues_github_issue', 'github/repos/{org}/{repo}/{number}')
 	)
 	->requirements(array('org', 'repo', 'number'));
 
+$this->create('issues_github_issue_comments', 'github/repos/{org}/{repo}/{number}/comments')
+	->get()
+	->action(
+		function($params) {
+			session_write_close();
+			$dispatcher = new Dispatcher($params);
+			$dispatcher->dispatch('GithubController', 'getIssueComments');
+		}
+	)
+	->requirements(array('org', 'repo', 'number'));
+
 $this->create('issues_github_clientconfig_write', 'github/clientconfig/write')
 	->post()
 	->action(

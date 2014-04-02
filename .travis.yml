@@ -5,4 +5,5 @@ language: node_js
       - 'cd js'
       - 'npm install'
       - 'bower install'
+    script:
       - 'grunt test'

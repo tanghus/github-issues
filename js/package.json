@@ -7,17 +7,15 @@
     "email": "thomas@tanghus.net"
   },
   "private": true,
-  "homepage": "https://github.com/tanghus/issues",
+  "homepage": "https://github.com/tanghus/github-issues",
   "repository": {
     "type": "git",
-    "url": "git@github.com:tanghus/issues.git"
+    "url": "git@github.com:tanghus/github-issues.git"
   },
-  "bugs": "https://github.com/tanghus/issues/issues",
+  "bugs": "https://github.com/tanghus/github-issues/issues",
   "license": "AGPL",
   "contributors": [],
-  "dependencies": {
-    "marked": "~0.3"
-  },
+  "dependencies": {},
   "devDependencies": {
     "bower": "*",
     "grunt": "*",
@@ -30,8 +28,7 @@
     "karma-jasmine": "^0.2.2",
     "karma-phantomjs-launcher": "*",
     "jquery": "^1.11.1-beta1",
-    "jquery-ui": "*",
-    "marked": "~0.3"
+    "jquery-ui": "*"
   },
   "engine": "node >= 0.8"
 }

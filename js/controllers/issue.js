@@ -7,41 +7,31 @@
 'use strict';
 
 /* Issue Controller */
-var issueCtrl = angular.module('issueDetailCtrl', []);
+(function() {
+	angular.module('issueDetailCtrl', [])
+	.controller(
+		'issueDetailCtrl',
+		['$scope', '$sce', '$routeParams', 'OC', 'Request',
+		function($scope, $sce, $routeParams, OC, Request
+	) {
 
-issueCtrl.controller(
-	'issueDetailCtrl',
-	['$scope', '$sce', '$routeParams', 'OC', 'Request', 'marked',
-	function($scope, $sce, $routeParams, OC, Request, marked
-) {
-
-	console.log('routeParams', $routeParams);
-	$scope.initialized = false;
-	Request.getIssue($routeParams.org, $routeParams.repo, $routeParams.issue)
-	.then(function(issue) {
-		// call was successful
-		console.log('issue', issue);
-		marked.setOptions({
-		renderer: new marked.Renderer(),
-		gfm: true,
-		tables: true,
-		breaks: true,
-		pedantic: false,
-		sanitize: true,
-		smartLists: true,
-		smartypants: false
+		console.log('routeParams', $routeParams);
+		$scope.initialized = false;
+		Request.getIssue($routeParams.org, $routeParams.repo, $routeParams.issue)
+		.then(function(issue) {
+			console.log('issue', issue);
+			var date = new Date(issue.created_at);
+			issue.reldate = relative_modified_date(date/1000);
+			issue.isodate = date.toISOString();
+			issue.date = date.toLocaleDateString();
+			issue.body = $sce.trustAsHtml(issue.body_html);
+			$scope.org = $routeParams.org;
+			$scope.repo = $routeParams.repo;
+			$scope.issue = issue;
+			$scope.initialized = true;
+		}, function(response) {
+			// TODO: call returned an error
+			console.warn(response);
 		});
-		var date = new Date(issue.created_at);
-		issue.reldate = relative_modified_date(date/1000);
-		issue.isodate = date.toISOString();
-		issue.date = date.toLocaleDateString();
-		issue.body = $sce.trustAsHtml(marked(issue.body));
-		$scope.org = $routeParams.org;
-		$scope.repo = $routeParams.repo;
-		$scope.issue = issue;
-		$scope.initialized = true;
-	}, function(issue) {
-		// TODO: call returned an error
-		$scope.issue = issue;
-	});
-}]);
+	}]);
+}).call(this);

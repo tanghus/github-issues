@@ -2,7 +2,8 @@
     "require": {
         "php": ">=5.3.4",
         "knplabs/github-api": "*",
-        "erusev/parsedown": "*"
+        "erusev/parsedown": "*",
+		"phpseclib/phpseclib": "*"
     },
     "minimum-stability": "dev"
 }
