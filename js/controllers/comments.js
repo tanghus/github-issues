@@ -8,9 +8,9 @@
 
 /* Comment List Controller */
 (function() {
-	angular.module('CommentsCtrl', []).controller(
-		'CommentsCtrl', ['$scope', '$sce', '$location', 'OC', 'Request',
-		function($scope, $sce, $location, OC, Request
+	angular.module('IssueControllers').controller(
+		'CommentsCtrl', ['$scope', '$sce', '$location', 'Request',
+		function($scope, $sce, $location, Request
 	) {
 
 		$scope.initialized = false;

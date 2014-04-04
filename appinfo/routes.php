@@ -21,6 +21,37 @@ $this->create('issues_index', '')
 		}
 	);
 
+$this->create('issues_github_user', 'github/user')
+	->get()
+	->action(
+		function($params) {
+			session_write_close();
+			$dispatcher = new Dispatcher($params);
+			$dispatcher->dispatch('GithubController', 'getUser');
+		}
+	);
+
+$this->create('issues_github_authenticate', 'github/authenticate')
+	->post()
+	->action(
+		function($params) {
+			session_write_close();
+			$dispatcher = new Dispatcher($params);
+			$dispatcher->dispatch('GithubController', 'authenticate');
+		}
+	)
+	->requirements(array('user', 'password'));
+
+$this->create('issues_github_remove_authentication', 'github/authenticate')
+	->delete()
+	->action(
+		function($params) {
+			session_write_close();
+			$dispatcher = new Dispatcher($params);
+			$dispatcher->dispatch('GithubController', 'unAuthenticate');
+		}
+	);
+
 $this->create('issues_github_repos', 'github/repos/{org}')
 	->get()
 	->action(

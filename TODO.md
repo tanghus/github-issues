@@ -1,7 +1,6 @@
 # TODO
 
-* Add UI for entering user credentials.
-* Save user credentials somewhat safe.
+* Keep track of rate limit. https://developer.github.com/v3/#rate-limiting
 * Add comment.
 * Search issues.
 * Add issue.

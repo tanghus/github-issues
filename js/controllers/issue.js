@@ -8,11 +8,11 @@
 
 /* Issue Controller */
 (function() {
-	angular.module('issueDetailCtrl', [])
+	angular.module('IssueControllers')
 	.controller(
 		'issueDetailCtrl',
-		['$scope', '$sce', '$routeParams', 'OC', 'Request',
-		function($scope, $sce, $routeParams, OC, Request
+		['$scope', '$sce', '$routeParams', 'Request',
+		function($scope, $sce, $routeParams, Request
 	) {
 
 		console.log('routeParams', $routeParams);

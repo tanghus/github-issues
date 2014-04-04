@@ -11,9 +11,11 @@
 namespace OCA\Issues\Controller;
 
 use OCA\Issues\Controller,
+	OCA\Issues\Utils\config,
 	OCP\AppFramework\IAppContainer,
 	OCP\AppFramework\Http\JSONResponse,
 	OCP\AppFramework\Http,
+	OC\AppFramework\Middleware\Security\SecurityException,
 	Github\Client;
 
 
@@ -34,6 +36,11 @@ class GithubController extends Controller {
 	protected $github;
 
 	/**
+	 * @var \OCA\Issues\Utils\Config;
+	 */
+	protected $config;
+
+	/**
 	 * @var \Parsedown
 	 */
 	protected $parsedown;
@@ -47,12 +54,11 @@ class GithubController extends Controller {
 
 	protected $ghClientConfigFile = 'gh_client_config.json';
 
-	public function __construct(IAppContainer $container) {
-		parent::__construct($container);
-		$vendorDir = realpath(__DIR__ . '/../../3rdparty/vendor');
-		//\OCP\Util::writeLog('issues', __METHOD__.' vendorDir: ' . $vendorDir, \OCP\Util::DEBUG);
-		// TODO: Check that knplabs/github-api is installed
-		require_once $vendorDir . '/autoload.php';
+	public function __construct(IAppContainer $app) {
+		if (!$app->isLoggedIn()) {
+			throw new SecurityException('Current user is not logged in', Http::STATUS_UNAUTHORIZED);
+		}
+		parent::__construct($app);
 
 		$this->parsedown = new \Parsedown();
 
@@ -66,57 +72,111 @@ class GithubController extends Controller {
 			new \Github\HttpClient\CachedHttpClient(array('cache_dir' => $tmpDir))
 		);
 
-		$this->ghClientConfig = $this->readClientConfig();
+		$this->config = new Config($this->storage, $this->ghClientConfigFile);
+		try {
+			$this->ghClientConfig = $this->config->read();
+		} catch (\Exception $e) {
+			\OCP\Util::writeLog('issues', __METHOD__.' Exception: ' . $e->getMessage(), \OCP\Util::ERROR);
+		}
 		if(is_array($this->ghClientConfig)) {
 			$this->github->authenticate(
-				$this->ghClientConfig['user'],
+				$this->ghClientConfig['login'],
 				$this->ghClientConfig['password'], Client::AUTH_HTTP_PASSWORD
 			);
 		}
-		$this->github->getHttpClient()->setOption('user_agent', 'ownCloud Issues');
+		$appinfo = \OCP\App::getAppInfo('contacts');
+		$appversion = \OCP\App::getAppVersion('contacts');
+		$userAgent = 'ownCloud-'.$appinfo['name'].'/'.$appversion;
+		$this->github->getHttpClient()->setOption('user_agent', $userAgent);
 
-		$urlGenerator = $this->server->getUrlGenerator();
-		$appPath = $urlGenerator->getAbsoluteURL($urlGenerator->linkToRoute('issues_index'));
-		\OCP\Util::writeLog('issues', __METHOD__.' appPath: ' . $appPath, \OCP\Util::DEBUG);
+		//$urlGenerator = $this->server->getUrlGenerator();
+		//$appPath = $urlGenerator->getAbsoluteURL($urlGenerator->linkToRoute('issues_index'));
+		//\OCP\Util::writeLog('issues', __METHOD__.' appPath: ' . $appPath, \OCP\Util::DEBUG);
 	}
 
 	/**
-	 * Read any configured Github client configuration
+	 * @NoAdminRequired
 	 */
-	private function readClientConfig() {
-		if ($this->storage->is_file($this->ghClientConfigFile)) {
-			return json_decode($this->storage->file_get_contents($this->ghClientConfigFile), true);
-		}
-
-		return false;
-	}
-
-	public function writeClientConfig() {
-		$id = $this->request->post['id'];
-		$secret = $this->request->post['secret'];
-
-		$config = array('client_id' => $id, 'client_secret' => $secret);
-
+	public function authenticate() {
 		$response = new JSONResponse();
 
-		$options = 0;
-		if (defined('JSON_PRETTY_PRINT')) {
-			// only for PHP >= 5.4
-			$options = JSON_PRETTY_PRINT;
+		try {
+			$this->github->authenticate(
+				$this->request->post['login'],
+				$this->request->post['password'], Client::AUTH_HTTP_PASSWORD
+			);
+			$user = $this->github->api('current_user')->show();
+			\OCP\Util::writeLog('issues', __METHOD__.' user: ' . print_r($user, true), \OCP\Util::DEBUG);
+		} catch (\Exception $e) {
+			\OCP\Util::writeLog('issues', __METHOD__.' Exception: ' . $e->getMessage(), \OCP\Util::ERROR);
+			$response->setStatus(Http::STATUS_UNAUTHORIZED);
+			$response->setData(array(
+				'status' => 'error',
+				'message' => 'Authentication failed: ' . $e->getMessage()
+			));
+			return $response;
 		}
-		if ($this->storage->file_put_contents($this->ghClientConfigFile, json_encode($config, $options))) {
-			$this->storage->chmod($this->ghClientConfigFile, 0600);
-		} else {
+
+		try {
+			$this->config->write(
+				$this->request->post['login'],
+				$this->request->post['password']
+			);
+		} catch (\Exception $e) {
+			$response->setStatus(Http::STATUS_INTERNAL_SERVER_ERROR);
+			$response->setData(array(
+				'status' => 'error',
+				'message' => 'Unable to save credencials: ' . $e->getMessage()
+			));
+			return $response;
+		}
+
+		$response->setData(array(
+			'status' => 'success',
+			'user' => array('login' => $this->request->post['login'])
+		));
+		return $response;
+	}
+
+	/**
+	 * @NoAdminRequired
+	 */
+	public function unAuthenticate() {
+		$response = new JSONResponse();
+
+		try {
+			$this->config->remove();
+		} catch (\Exception $e) {
 			$response->setStatus(Http::STATUS_FORBIDDEN);
 			$response->setData(
 				array(
 					'status' => 'error',
-					'message' => 'Web server does not have permission to write to '
-						. $this->ghClientConfigFile
+					'message' => $e->getMessage()
 				)
 			);
 		}
 
+		return $response;
+	}
+
+	/**
+	 * @NoAdminRequired
+	 */
+	public function getUser() {
+		$response = new JSONResponse();
+
+		if ($this->ghClientConfig) {
+			$response->setData(array(
+				'status' => 'success',
+				'user' => array('login' => $this->ghClientConfig['login'])
+			));
+		} else {
+			// Don't set STATUS_TOO_MANY_REQUESTS until rate limit has been reached
+			$response->setData(array(
+				'status' => 'error',
+				'message' => 'Not authenticated'
+			));
+		}
 		return $response;
 	}
 
@@ -132,32 +192,43 @@ class GithubController extends Controller {
 		$repos = array();
 
 		$page = 1;
-		while ($tmpRepos = $this->github->api('repos')->org($org, array('page' => $page))) {
-			\OCP\Util::writeLog('issues', __METHOD__.' page: ' . $page, \OCP\Util::DEBUG);
-			\OCP\Util::writeLog('issues', __METHOD__.' batch count: ' . count($tmpRepos), \OCP\Util::DEBUG);
-			if (count($tmpRepos) === 0) {
-				break;
+		try {
+			while ($tmpRepos = $this->github->api('repos')->org($org, array('page' => $page))) {
+				\OCP\Util::writeLog('issues', __METHOD__.' page: ' . $page, \OCP\Util::DEBUG);
+				\OCP\Util::writeLog('issues', __METHOD__.' batch count: ' . count($tmpRepos), \OCP\Util::DEBUG);
+				if (count($tmpRepos) === 0) {
+					break;
+				}
+
+				$headers = $this->github->getHttpClient()->getLastResponse()->getHeaders();
+
+				foreach ($headers as $name => $value) {
+					//\OCP\Util::writeLog('issues', __METHOD__.' header: ' . $name . ': ' . print_r($value, true), \OCP\Util::DEBUG);
+				}
+
+				\OCP\Util::writeLog('issues', __METHOD__.' RateLimit: ' . $this->github->getHttpClient()->getLastResponse()->getHeader('X-RateLimit-Limit'), \OCP\Util::DEBUG);
+				\OCP\Util::writeLog('issues', __METHOD__.' Remaining: ' . $this->github->getHttpClient()->getLastResponse()->getHeader('X-RateLimit-Remaining'), \OCP\Util::DEBUG);
+				\OCP\Util::writeLog('issues', __METHOD__.' Remaining: ' . $this->github->getHttpClient()->getLastResponse()->getHeader('X-RateLimit-Reset'), \OCP\Util::DEBUG);
+				//\OCP\Util::writeLog('issues', __METHOD__.' Link: ' . print_r($this->github->getHttpClient()->getLastResponse()->getHeader('link')->getLink('next'), true), \OCP\Util::DEBUG);
+
+				$links = $this->github->getHttpClient()->getLastResponse()->getHeader('link');
+				\OCP\Util::writeLog('issues', __METHOD__.' Links: ' . print_r($links, true), \OCP\Util::DEBUG);
+
+				foreach ($tmpRepos as $repo) {
+					if ($repo['has_issues'] === true) {
+						$repos[] = $repo;
+					}
+				}
+				$page++;
 			}
-
-		$headers = $this->github->getHttpClient()->getLastResponse()->getHeaders();
-
-		foreach ($headers as $name => $value) {
-			//\OCP\Util::writeLog('issues', __METHOD__.' header: ' . $name . ': ' . print_r($value, true), \OCP\Util::DEBUG);
-		}
-
-		//\OCP\Util::writeLog('issues', __METHOD__.' RateLimit: ' . $this->github->getHttpClient()->getLastResponse()->getHeader('X-RateLimit-Limit'), \OCP\Util::DEBUG);
-		//\OCP\Util::writeLog('issues', __METHOD__.' Remaining: ' . $this->github->getHttpClient()->getLastResponse()->getHeader('X-RateLimit-Remaining'), \OCP\Util::DEBUG);
-		//\OCP\Util::writeLog('issues', __METHOD__.' Link: ' . print_r($this->github->getHttpClient()->getLastResponse()->getHeader('link')->getLink('next'), true), \OCP\Util::DEBUG);
-
-		$links = $this->github->getHttpClient()->getLastResponse()->getHeader('link');
-		\OCP\Util::writeLog('issues', __METHOD__.' Links: ' . print_r($links, true), \OCP\Util::DEBUG);
-
-		foreach ($tmpRepos as $repo) {
-			if ($repo['has_issues'] === true) {
-				$repos[] = $repo;
-			}
-		}
-		$page++;
+		} catch (\Exception $e) {
+			\OCP\Util::writeLog('issues', __METHOD__.' Error loading repositories: ' . $e->getMessage(), \OCP\Util::DEBUG);
+			$response->setStatus(Http::STATUS_INTERNAL_SERVER_ERROR);
+			$response->setData(array(
+				'status' => 'error',
+				'message' => 'Error loading repositories: ' . $e->getMessage()
+			));
+			return $response;
 		}
 		\OCP\Util::writeLog('issues', __METHOD__.' num repos: ' . count($repos), \OCP\Util::DEBUG);
 
@@ -274,7 +345,7 @@ class GithubController extends Controller {
 
 			return $response;
 		} catch (\Github\Exception\RuntimeException $e) {
-			$response->setStatus(Http::STATUS_METHOD_NOT_ALLOWED);
+			$response->setStatus(Http::STATUS_INTERNAL_SERVER_ERROR);
 			$response->setData(array('status' => 'error', 'message' => $e->getMessage()));
 			return $response;
 		}

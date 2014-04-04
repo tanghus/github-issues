@@ -34,14 +34,16 @@ class PageController extends Controller {
 			\OCP\Util::addScript('issues', 'bower_components/angular-resource/angular-resource.min');
 		}
 		\OCP\Util::addScript('issues', 'app');
-		\OCP\Util::addScript('issues', 'services/externals');
+		\OCP\Util::addScript('issues', 'controllers/issuecontrollers');
 		\OCP\Util::addScript('issues', 'controllers/intro');
 		\OCP\Util::addScript('issues', 'controllers/repos');
 		\OCP\Util::addScript('issues', 'controllers/issues');
 		\OCP\Util::addScript('issues', 'controllers/issue');
 		\OCP\Util::addScript('issues', 'controllers/comments');
 		\OCP\Util::addScript('issues', 'controllers/settings');
+		\OCP\Util::addScript('issues', 'directives/documentclick');
 		\OCP\Util::addScript('issues', 'services/request');
+		\OCP\Util::addScript('issues', 'services/externals');
 		\OCP\Util::addStyle('issues', 'issues');
 
 		// TODO: Make a HTMLTemplateResponse class

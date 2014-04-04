@@ -1,12 +1,15 @@
 Changelog
 
 * Load all repos.
-* Filer repos on name.
+* Filter repos on name.
 * Load issues per repo.
 * Load comments per issue.
 * Sort repos by name.
 * Filter repos input field.
 * Load comments.
 * Show issue events in comment list.
-* Add link to commit when comment is closed.
+* Add link to commit when issue is closed.
 * Update title on load and navigation.
+* Add UI for entering user credentials.
+* Save user credentials somewhat safe.
+* Move configuration/credentials handling to separate class.

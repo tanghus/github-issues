@@ -6,9 +6,30 @@
  */
 
 (function() {
-	angular.module('Issues').factory('Request', ['$http', '$q', 'OC',
-	function($http, $q, OC) {
+	angular.module('Issues')
+	.factory('Request', ['$http', '$injector', '$q', 'OC',
+	function($http, $injector, $q, OC) {
 		return {
+			getUser: function() {
+				return this.requestRoute(
+					'github/user',
+					'GET'
+				);
+			},
+			authenticate: function(user) {
+				return this.requestRoute(
+					'github/authenticate',
+					'POST',
+					{},
+					user
+				);
+			},
+			unAuthenticate: function() {
+				return this.requestRoute(
+					'github/authenticate',
+					'DELETE'
+				);
+			},
 			getRepos: function(org) {
 				return this.requestRoute(
 					'github/repos/{org}',
@@ -48,11 +69,19 @@
 				);
 			},
 			requestRoute: function(route, method, routeParams, params, additionalHeaders) {
+				var rScope = $injector.get('$rootScope');
+				if(rScope) {
+					//console.log('got rootScope');
+					//rScope.$broadcast('exception',exception, cause);
+				}
+				var isJSON = (typeof params === 'string');
+				var contentType = isJSON
+					? (type === 'PATCH' ? 'application/json-merge-patch' : 'application/json')
+					: 'application/x-www-form-urlencoded';
+				console.log('contentType', contentType);
 				var headers = {
 					Accept : 'application/json; charset=utf-8',
-					contentType: method === 'PATCH'
-						? 'application/json-merge-patch'
-						: 'application/json'
+					contentType: contentType
 				};
 				if(typeof additionalHeaders === 'object') {
 					headers = $.extend(headers, additionalHeaders);
@@ -61,9 +90,13 @@
 				var config = {
 					method: method,
 					url: OC.generateUrl('apps/issues/' + route, routeParams),
-					params: params,
-					headers: headers
+					headers: headers,
 				};
+				if (method === 'GET') {
+					config.params = params;
+				} else {
+					config.data = params;
+				}
 
 				var deferred = $q.defer();
 

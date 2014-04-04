@@ -6,11 +6,7 @@
  */
 'use strict';
 
-/* Intro Controller */
+/* Issue Controllers */
 (function() {
-	angular.module('IssueControllers')
-	.controller('IntroCtrl', ['$scope', 'OC', 'Request', function($scope, OC, Request) {
-		// Nothing going on here, move on
-
-	}]);
+	angular.module('IssueControllers', ['Externals']);
 }).call(this);

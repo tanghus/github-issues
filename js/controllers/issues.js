@@ -8,10 +8,10 @@
 
 /* Issue List Controller */
 (function() {
-	angular.module('IssuesCtrl', [])
+	angular.module('IssueControllers')
 	.controller(
-		'IssuesCtrl', ['$scope', '$location', '$routeParams', 'OC', 'Request',
-		function($scope, $location, $routeParams, OC, Request
+		'IssuesCtrl', ['$scope', '$location', '$routeParams', 'Request',
+		function($scope, $location, $routeParams, Request
 	) {
 
 		console.log('routeParams', $routeParams);

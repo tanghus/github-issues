@@ -8,10 +8,10 @@
 
 /* Repository Controller */
 (function() {
-	angular.module('ReposCtrl', [])
-	.controller('ReposCtrl', ['$scope', 'OC', 'Request', function($scope, OC, Request) {
+	angular.module('IssueControllers')
+	.controller('ReposCtrl', ['$scope', 'Request', function($scope, Request) {
 
-		console.log('ReposCtrl');
+		//console.log('ReposCtrl');
 		$scope.repos = [];
 		$scope.org = 'owncloud';
 		$scope.initialized = false;

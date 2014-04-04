@@ -5,15 +5,20 @@
 (function() {
 	angular.module('Issues', [
 		'ngRoute',
-		'IntroCtrl',
-		'ReposCtrl',
-		'IssuesCtrl',
-		'issueDetailCtrl',
-		'CommentsCtrl',
-		'SettingsCtrl'
+		'IssueControllers'
 		//'phonecatFilters',
 		//'phonecatServices'
-	]).config(['$routeProvider',
+	])
+	.controller('AppCtrl', ['$rootScope', '$document', 'OC', 'SettingsLoader',
+	function($rootScope, $document, OC, SettingsLoader) {
+		console.dir(SettingsLoader);
+		// Contains property 'login' if credentials have been saved
+		// and 'password' when user is adding/updating credentials.
+		$rootScope.user = {};
+		$rootScope.isAuthenticated = false;
+		SettingsLoader();
+	}])
+	.config(['$routeProvider',
 		function($routeProvider) {
 			$routeProvider.
 			when('/:org/:repo', {
@@ -45,6 +50,10 @@
 	])
 	.run(['$location', '$rootScope', '$document',
 		function($location, $rootScope, $document) {
+
+			// TODO: Test this
+			// http://docs.angularjs.org/api/ng/service/$controller
+			//$controller('SettingsCtrl', [/*locals*/]);
 			// Update title base on context
 			$rootScope.$on('$routeChangeSuccess', function(event, current, previous) {
 				if (!$rootScope.originalTitle) {

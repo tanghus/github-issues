@@ -13,14 +13,14 @@ angular.module('BreakfastApp').factory(
 */
 
 (function() {
-	angular.module('Issues')
+	angular.module('Externals', [])
 	.service('OC', function () {
 		return OC;
 	})
 	.config([
 		'$httpProvider', function($httpProvider) {
-		return $httpProvider.defaults.headers.common['requesttoken'] = oc_requesttoken;
+			return $httpProvider.defaults.headers.common['requesttoken'] = oc_requesttoken;
 		}
 	]);
-}).call(this);
+})(window, jQuery, OC);
 
